@@ -1,4 +1,5 @@
 package com.example.SpringEmployeePayRollDev.controller;
+import com.example.SpringEmployeePayRollDev.exception.EmployeeNotFoundException;
 import com.example.SpringEmployeePayRollDev.model.Employee;
 import com.example.SpringEmployeePayRollDev.repository.EmployeeRepository;
 import jakarta.validation.Valid;
@@ -29,9 +30,9 @@ public class EmployeeController {
     @GetMapping("/{id}")
     public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) {
         log.info("Fetching employee with ID: {}", id);
-        Optional<Employee> employee = employeeRepository.findById(id);
-        return employee.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with ID: " + id));
+        return ResponseEntity.ok(employee);
     }
 
     // 3️⃣ Add a New Employee
@@ -45,30 +46,26 @@ public class EmployeeController {
     // 4️⃣ Update an Employee
     @PutMapping("/{id}")
     public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @Valid @RequestBody Employee employeeDetails) {
-        log.info("Update an employee: {}{}", id, employeeDetails);
-        Optional<Employee> employeeOptional = employeeRepository.findById(id);
+        log.info("Updating employee with ID: {}", id);
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with ID: " + id));
 
-        if (employeeOptional.isPresent()) {
-            Employee employee = employeeOptional.get();
-            employee.setName(employeeDetails.getName());
-            employee.setSalary(employeeDetails.getSalary());
-            employee.setDepartment(employeeDetails.getDepartment());
-            return ResponseEntity.ok(employeeRepository.save(employee));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        employee.setName(employeeDetails.getName());
+        employee.setDepartment(employeeDetails.getDepartment());
+        employee.setSalary(employeeDetails.getSalary());
+        return ResponseEntity.ok(employeeRepository.save(employee));
     }
+
 
     // 5️⃣ Delete an Employee
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEmployee(@PathVariable Long id) {
-        log.info("Delete employee with ID: {}", id);
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id);
-            return ResponseEntity.ok("Employee deleted successfully");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        log.info("Deleting employee with ID: {}", id);
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException("Employee not found with ID: " + id));
+
+        employeeRepository.delete(employee);
+        return ResponseEntity.ok("Employee deleted successfully");
     }
 }
 
