@@ -32,3 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 Spring-Employee-PayRoll-Dev/app.log
+Spring-Employee-PayRoll-Dev/app-dev.log
+app-dev.log
