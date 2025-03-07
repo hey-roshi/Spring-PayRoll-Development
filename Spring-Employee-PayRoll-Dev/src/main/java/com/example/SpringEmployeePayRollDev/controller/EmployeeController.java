@@ -1,14 +1,14 @@
 package com.example.SpringEmployeePayRollDev.controller;
-
 import com.example.SpringEmployeePayRollDev.model.Employee;
 import com.example.SpringEmployeePayRollDev.repository.EmployeeRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Optional;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
@@ -36,15 +36,16 @@ public class EmployeeController {
 
     // 3️⃣ Add a New Employee
     @PostMapping
-    public Employee addEmployee(@RequestBody Employee employee) {
+    public ResponseEntity<Employee> addEmployee(@Valid @RequestBody Employee employee) {
         log.info("Adding new employee: {}", employee);
-        return employeeRepository.save(employee);
+        Employee savedEmployee = employeeRepository.save(employee);
+        return ResponseEntity.ok(savedEmployee);
     }
 
     // 4️⃣ Update an Employee
     @PutMapping("/{id}")
-    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
-        log.info("Update an employee: {}{}", id,employeeDetails);
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @Valid @RequestBody Employee employeeDetails) {
+        log.info("Update an employee: {}{}", id, employeeDetails);
         Optional<Employee> employeeOptional = employeeRepository.findById(id);
 
         if (employeeOptional.isPresent()) {
@@ -60,7 +61,6 @@ public class EmployeeController {
 
     // 5️⃣ Delete an Employee
     @DeleteMapping("/{id}")
-
     public ResponseEntity<String> deleteEmployee(@PathVariable Long id) {
         log.info("Delete employee with ID: {}", id);
         if (employeeRepository.existsById(id)) {
